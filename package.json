@@ -1,14 +1,15 @@
 {
   "author": "",
   "dependencies": {
+    "circomlibjs": "^0.1.7",
     "dotenv": "^18.0.10",
     "ethers": "^6.17.0",
     "snarkjs": "^0.7.5"
   },
   "description": "Proof Gatekeeper agent for the zkVerify Agent Games — deterministic HMAC-authenticated endpoint, local Groth16 proofs (snarkjs), Kurier submission to zkVerify.",
   "devDependencies": {
+    "@flydotio/dockerfile": "^0.7.15",
     "@types/node": "^26.6.6",
-    "circomlibjs": "^0.1.7",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3"
   },
@@ -26,8 +27,10 @@
     "build": "tsc",
     "dev": "tsx src/index.ts",
     "start": "node dist/index.js",
-    "test": "npm run build && tsx test/harness.ts",
+    "test": "npm run build && tsx test/harness.ts && tsx test/steal-harness.ts",
     "test:watch": "tsx --watch test/harness.ts",
+    "test:steal": "npm run build && tsx test/steal-harness.ts",
+    "steal-commitment": "tsx scripts/steal-commitment.ts",
     "fetch-circuits": "tsx src/artifacts.ts"
   },
   "version": "1.0.0"

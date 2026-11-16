@@ -17,7 +17,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { Config } from "./config";
-import { signBody, verifySignature, SIGNATURE_HEADER } from "./hmac";
+import { verifySignature } from "./hmac";
+import { jsonResult, type HttpResult } from "./respond";
 import {
   buildCircuitInput,
   freshSalt,
@@ -39,6 +40,8 @@ import {
 import { Prover, type Groth16Proof } from "./prover";
 import { KurierClient } from "./kurier";
 import type { ProofStore } from "./store";
+import { handleStealTurn, type StealContext } from "./steal-handler";
+import { STEAL_EVENT_ID } from "./steal-circuit";
 
 export interface AgentContext {
   config: Config;
@@ -49,12 +52,13 @@ export interface AgentContext {
    *  expected hash only when the VK was registered on testnet at startup). */
   kurierVkHash: string;
   vkJson: Record<string, unknown>;
-}
-
-export interface HttpResult {
-  status: number;
-  headers: Record<string, string>;
-  body: Buffer;
+  /** Steal-the-VFY context, or null when the track is not configured
+   *  (STEAL_VFY_SALT unset) — Steal turns then answer 503. */
+  steal: StealContext | null;
+  /** Steal response cache: one entry per (matchId, turn), bounded FIFO.
+   *  A platform retry after a network failure receives the byte-identical
+   *  response (same proof, same idempotency key, same timestamp). */
+  stealResponses: Map<string, HttpResult>;
 }
 
 interface AgentResponse {
@@ -63,20 +67,6 @@ interface AgentResponse {
   proof: Groth16Proof | null;
   public_signals: string[] | null;
   proof_tx: string | null;
-}
-
-function jsonResult(
-  status: number,
-  obj: unknown,
-  cfg: Config,
-  sign: boolean
-): HttpResult {
-  const body = Buffer.from(JSON.stringify(obj), "utf8");
-  const headers: Record<string, string> = { "content-type": "application/json" };
-  if (sign) {
-    headers[SIGNATURE_HEADER] = signBody(cfg.hmacSecret, cfg.hmacAlgorithm, body);
-  }
-  return { status, headers, body };
 }
 
 class DeadlineExceeded extends Error {
@@ -117,6 +107,13 @@ export async function handleAgentRequest(
     (body as Record<string, unknown>).type === TASK_TYPE
   ) {
     return handleTask(body, ctx);
+  }
+  if (
+    body !== null &&
+    typeof body === "object" &&
+    (body as Record<string, unknown>).eventId === STEAL_EVENT_ID
+  ) {
+    return handleStealTurn(body, ctx);
   }
   return jsonResult(400, { error: "unknown_type" }, cfg, true);
 }

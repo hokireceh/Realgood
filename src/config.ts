@@ -57,6 +57,10 @@ export interface Config {
   tlsKeyPath: string | null;
   tlsCertPath: string | null;
   skipSelfTest: boolean;
+  /** Steal-the-VFY strategy params (raw env string; parsed at startup). */
+  stealParamsRaw: string;
+  /** Steal salt (decimal or 0x-hex); null = the Steal track is disabled. */
+  stealSalt: string | null;
 }
 
 function loadConfig(): Config {
@@ -87,6 +91,8 @@ function loadConfig(): Config {
     tlsKeyPath: process.env.TLS_KEY_PATH?.trim() || null,
     tlsCertPath: process.env.TLS_CERT_PATH?.trim() || null,
     skipSelfTest: optionalBool("SKIP_SELF_TEST", false),
+    stealParamsRaw: optional("STEAL_VFY_PARAMS", "8,18,8,0,0,0,0,0"),
+    stealSalt: process.env.STEAL_VFY_SALT?.trim() || null,
   };
 
   if (!/^0x[0-9a-f]{64}$/.test(cfg.gatekeeperVkHash)) {
