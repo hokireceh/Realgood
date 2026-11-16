@@ -1,19 +1,8 @@
-# fly.toml — app ini di-rename user 2026-11-16 dari long-canyon-4577 ke
-# realgood, dan di-deploy manual oleh user (2 mesin, iad, 512MB — naik dari
-# 256MB 2026-11-16 ~14:55 WIB: prove vfy-policy peak RSS ~300MB, mesin 256MB
-# OOM-killed (exit 137) saat self-test Steal -> crash-loop, /health 502.
-# Gatekeeper prove peak ~223MB, muat di 256MB; Steal TIDAK. Jangan turunkan
-# ke 256MB selama track Steal aktif.
-# internal_port HARUS 3000: gatekeeper listen di PORT (default 3000).
-# Deploy manual user pakai 8080 (default fly launch) -> proxy connection
-# refused; diperbaiki Chi 2026-11-16 ~11:55 WIB via redeploy --image.
-# KURIER: MAINNET, nilai ditulis EKSPLISIT di [env] — menghapus blok
-# [env] saja TIDAK mencabut var testnet dari mesin (terbukti 12:14 WIB:
-# mesin v8 masih register-vk ke testnet + 401). Key testnet pertama user
-# DITOLAK testnet Kurier (HTTP 401 "Unauthorized or disabled API key",
-# 2026-11-16 ~12:11 WIB) -> app crash-loop fail-fast. User ganti secret
-# KURIER_API_KEY ke key MAINNET (digest eae749a13a63f44a). VK gatekeeper
-# sudah terdaftar di mainnet (0x6b79c6…), jadi VK_REGISTERED=true.
+# fly.toml app configuration file generated for realgood on 2026-11-16T08:38:15Z
+#
+# See https://docs.fly.io/reference/configuration for information about how to use this file.
+#
+
 app = 'realgood'
 primary_region = 'iad'
 
@@ -22,10 +11,11 @@ primary_region = 'iad'
   KURIER_VK_REGISTERED = "true"
 
 [build]
+
 [http_service]
   internal_port = 3000
   force_https = true
-  auto_stop_machines = 'stop'
+  auto_stop_machines = true
   auto_start_machines = true
   # 1 mesin hangat terus (diputuskan 2026-11-16 ~15:30 WIB): cold-start
   # self-test 15-30 dtk bisa memakan deadline 60 dtk saat task datang.
@@ -39,3 +29,11 @@ primary_region = 'iad'
   cpu_kind = 'shared'
   cpus = 1
   memory_mb = 512
+
+[[vm]]
+  memory = '256mb'
+  cpu_kind = 'shared'
+  cpus = 1
+  memory_mb = 256
+  processes = ['app']
+  size = 'shared-cpu-1x'
