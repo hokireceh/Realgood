@@ -1,5 +1,9 @@
 # fly.toml — app ini di-rename user 2026-11-16 dari long-canyon-4577 ke
-# realgood, dan di-deploy manual oleh user (2 mesin, iad, 256MB).
+# realgood, dan di-deploy manual oleh user (2 mesin, iad, 512MB — naik dari
+# 256MB 2026-11-16 ~14:55 WIB: prove vfy-policy peak RSS ~300MB, mesin 256MB
+# OOM-killed (exit 137) saat self-test Steal -> crash-loop, /health 502.
+# Gatekeeper prove peak ~223MB, muat di 256MB; Steal TIDAK. Jangan turunkan
+# ke 256MB selama track Steal aktif.
 # internal_port HARUS 3000: gatekeeper listen di PORT (default 3000).
 # Deploy manual user pakai 8080 (default fly launch) -> proxy connection
 # refused; diperbaiki Chi 2026-11-16 ~11:55 WIB via redeploy --image.
@@ -27,7 +31,7 @@ primary_region = 'iad'
   processes = ['app']
 
 [[vm]]
-  memory = '256mb'
+  memory = '512mb'
   cpu_kind = 'shared'
   cpus = 1
-  memory_mb = 256
+  memory_mb = 512
