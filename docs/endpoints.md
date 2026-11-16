@@ -184,8 +184,10 @@ project; skrip eksperimen: `/tmp/steal-exp*.cjs`).
   strategyCommitment:{hash}}`. Respons:
   `{matchId, turn, action:{type, amount?}, policyProof:{circuitVersion:"v1",
   proof, public_signals, publicInputsHash}, agentTimestamp,
-  idempotencyKey:"steal-<matchId>-turn-<n>"}` — `amount` WAJIB absen
-  untuk HOLD/FORTIFY. Deadline turn 5 mnt (budget internal: min(deadline
+  idempotencyKey:<UUID v5 deterministik dari matchId+turn>}` — `amount` WAJIB absen
+  untuk HOLD/FORTIFY. (Koreksi 2026-11-16: format lama
+  `steal-<matchId>-turn-<n>` DITOLAK platform — "idempotencyKey: Invalid
+  UUID" pada practice dispatch; kini UUID v5, `src/uuidv5.ts`.) Deadline turn 5 mnt (budget internal: min(deadline
   envelope, terima+300 dtk) − 10 dtk reserve); prove lokal ~1 dtk; tanpa
   Kurier (platform verifikasi proof sendiri). Replay turn yang sama →
   respons byte-identik dari cache in-memory (500 entri, FIFO).

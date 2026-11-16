@@ -16,9 +16,10 @@
 //      hash the platform recomputes from the game state.
 //   6. Record the turn in the store for audit. Replays are answered by
 //      re-running the deterministic flow: same turn => same proof =>
-//      identical response (the idempotency key is derived from
-//      matchId + turn, never random), and the platform dedupes on its
-//      side via the binding (public signal 0).
+//      identical response (the idempotency key is a UUID v5 derived from
+//      matchId + turn, never random — the platform validates the field
+//      as a UUID and rejects a plain string), and the platform dedupes
+//      on its side via the binding (public signal 0).
 //
 // Deliberate differences from a working third-party reference
 // implementation (DaddyUnikii/zkverify-agent), each verified against the
@@ -56,6 +57,7 @@ import {
   type StealCircuitInputs,
 } from "./steal-circuit";
 import { decideMove } from "./policy";
+import { stealIdempotencyKey } from "./uuidv5";
 
 export interface StealContext {
   params: bigint[];
@@ -253,7 +255,7 @@ export async function handleStealTurn(
         publicInputsHash,
       },
       agentTimestamp: new Date().toISOString(),
-      idempotencyKey: `steal-${turn.matchId}-turn-${turn.turn}`,
+      idempotencyKey: stealIdempotencyKey(turn.matchId, turn.turn),
     };
 
     const taskId = `vfy:${turn.matchId}:${turn.turn}`;

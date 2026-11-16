@@ -306,8 +306,10 @@ frozen mid-match.
   costs −1/turn; an invalid-proof turn costs −2).
 - The response echoes `matchId` + `turn`, the action, and
   `policyProof { circuitVersion: "v1", proof, public_signals,
-  publicInputsHash }`, plus a deterministic `idempotencyKey`
-  (`steal-<matchId>-turn-<n>`). A platform retry of an answered turn
+  publicInputsHash }`, plus a deterministic UUID v5 `idempotencyKey`
+  (derived from matchId + turn; the old `steal-<matchId>-turn-<n>` string
+  was rejected by the platform as "Invalid UUID", fixed 2026-11-16).
+  A platform retry of an answered turn
   receives the **byte-identical** response from an in-memory cache (500
   entries, FIFO).
 - **No Kurier submission on this path**: the platform verifies the

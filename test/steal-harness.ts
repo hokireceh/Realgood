@@ -35,6 +35,7 @@ import {
   parseStrategyParams,
   validateStrategyParams,
 } from "../src/policy";
+import { stealIdempotencyKey } from "../src/uuidv5";
 
 const ROOT = path.resolve(__dirname, "..");
 const PORT = 18200 + Math.floor(Math.random() * 800);
@@ -196,8 +197,12 @@ async function main(): Promise<void> {
       const sig = res.headers.get("x-agent-games-signature") ?? "";
       check("response is HMAC-signed", sig === sign(Buffer.from(res.text, "utf8")));
       check(
-        "idempotencyKey is deterministic per turn",
-        j?.idempotencyKey === `steal-${matchId}-turn-${turn}`
+        "idempotencyKey is a deterministic UUID v5 per turn",
+        typeof j?.idempotencyKey === "string" &&
+          /^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+            j.idempotencyKey as string
+          ) &&
+          j.idempotencyKey === stealIdempotencyKey(matchId, turn)
       );
 
       const pp = j?.policyProof as Record<string, unknown> | undefined;
