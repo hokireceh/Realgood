@@ -1,0 +1,34 @@
+{
+  "author": "",
+  "dependencies": {
+    "dotenv": "^18.0.10",
+    "ethers": "^6.17.0",
+    "snarkjs": "^0.7.5"
+  },
+  "description": "Proof Gatekeeper agent for the zkVerify Agent Games — deterministic HMAC-authenticated endpoint, local Groth16 proofs (snarkjs), Kurier submission to zkVerify.",
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "circomlibjs": "^0.1.7",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  },
+  "keywords": [
+    "zkverify",
+    "agent-games",
+    "groth16",
+    "snarkjs",
+    "kurier"
+  ],
+  "license": "MIT",
+  "main": "dist/index.js",
+  "name": "proof-gatekeeper",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "test": "npm run build && tsx test/harness.ts",
+    "test:watch": "tsx --watch test/harness.ts",
+    "fetch-circuits": "tsx src/artifacts.ts"
+  },
+  "version": "1.0.0"
+}
