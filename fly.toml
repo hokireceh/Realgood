@@ -27,7 +27,11 @@ primary_region = 'iad'
   force_https = true
   auto_stop_machines = 'stop'
   auto_start_machines = true
-  min_machines_running = 0
+  # 1 mesin hangat terus (diputuskan 2026-11-16 ~15:30 WIB): cold-start
+  # self-test 15-30 dtk bisa memakan deadline 60 dtk saat task datang.
+  # Biaya: 1 mesin 512MB jalan 24/7 kira-kira $4,38/bln, masih di bawah
+  # ambang gratis $5 -> tagihan tetap $0.
+  min_machines_running = 1
   processes = ['app']
 
 [[vm]]
